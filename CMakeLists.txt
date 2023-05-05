@@ -28,7 +28,8 @@ endif()
 message(${Boost_INCLUDE_DIRS})
 
 set(LIB_SRC
-    zero/log.cc    
+    zero/log.cc
+    zero/util.cc        
 )
 
 add_library(zero SHARED ${LIB_SRC})
@@ -46,6 +47,8 @@ if(BUILD_TEST)
 zero_add_executable(test_timefunc "tests/test_timefunc.cc" zero "${LIBS}")
 zero_add_executable(test_mapfunc "tests/test_mapfunc.cc" zero "${LIBS}")
 zero_add_executable(test_constructor "tests/test_constructor.cc" zero "${LIBS}")
+zero_add_executable(test_singleton "tests/test_singleton.cc" zero "${LIBS}")
+zero_add_executable(test_log "tests/test_log.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
