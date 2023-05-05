@@ -24,7 +24,7 @@ function(force_redefine_file_macro_for_sources targetname)
 endfunction()
 
 # wrapper for add_executable
-function(sylar_add_executable targetname srcs depends libs)
+function(zero_add_executable targetname srcs depends libs)
     add_executable(${targetname} ${srcs})
     add_dependencies(${targetname} ${depends})
     force_redefine_file_macro_for_sources(${targetname})
