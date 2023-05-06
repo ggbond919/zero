@@ -6,7 +6,8 @@
  *          X 为了创造多个实例对应的Tag
  *          N 同一个Tag创造多个实例索引
  */
-template <class T, typename X = void, int N = 0> class Singleton {
+template <class T, typename X = void, int N = 0>
+class Singleton {
 public:
     /**
      * @brief 返回单例裸指针

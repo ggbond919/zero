@@ -7,8 +7,7 @@ int main() {
     };
     class test_construtor2 : public test_construtor1 {
     public:
-        test_construtor2()
-            : test_construtor1(1) {}
+        test_construtor2() : test_construtor1(1) {}
     };
 
     return 0;

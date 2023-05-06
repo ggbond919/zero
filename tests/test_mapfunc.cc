@@ -13,8 +13,8 @@ void fun2(int j) {
 typedef std::function<void(int)> T;
 int main() {
     std::map<int, T> m;
-    m[1]     = fun1;
-    m[2]     = fun2;
+    m[1] = fun1;
+    m[2] = fun2;
     auto it1 = m.find(1);
     it1->second(1);
     auto it = it1->second;
