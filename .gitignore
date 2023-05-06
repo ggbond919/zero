@@ -45,3 +45,7 @@ bin/*
 system.txt
 log.txt
 log/*
+
+# .vscode
+.vscode/
+
