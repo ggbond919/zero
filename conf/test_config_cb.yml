@@ -1,0 +1,7 @@
+global:
+    int: 9999
+class:
+    person:
+        name: wjh
+        age: 18
+        sex: true
