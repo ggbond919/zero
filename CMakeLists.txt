@@ -6,7 +6,7 @@ include(cmake/utils.cmake)
 
 # 指定编译选项
 # -Werror
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++11 -O0 -ggdb -Wall") 
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++11 -O0 -ggdb -fno-limit-debug-info -Wall") 
 
 #
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic -fPIC") 
@@ -25,11 +25,12 @@ find_package(Boost REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 endif()
-message(${Boost_INCLUDE_DIRS})
+message("boost path" ${Boost_INCLUDE_DIRS})
 
 set(LIB_SRC
     zero/log.cc
-    zero/util.cc        
+    zero/util.cc
+    zero/config.cc     
 )
 
 add_library(zero SHARED ${LIB_SRC})
@@ -49,6 +50,7 @@ zero_add_executable(test_mapfunc "tests/test_mapfunc.cc" zero "${LIBS}")
 zero_add_executable(test_constructor "tests/test_constructor.cc" zero "${LIBS}")
 zero_add_executable(test_singleton "tests/test_singleton.cc" zero "${LIBS}")
 zero_add_executable(test_log "tests/test_log.cc" zero "${LIBS}")
+zero_add_executable(test_config "tests/test_config.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
