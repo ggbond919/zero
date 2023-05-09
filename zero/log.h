@@ -1,5 +1,5 @@
-#ifndef __ZERO_LOG_H___
-#define __ZERO_LOG_H___
+#ifndef __ZERO_LOG_H__
+#define __ZERO_LOG_H__
 
 #include "singleton.h"
 #include "util.h"
@@ -18,7 +18,7 @@
 #include <vector>
 
 // TODO
-// util类，协程，单例
+// util类，协程
 /**
  * @brief
  * 获取root日志器
@@ -520,7 +520,6 @@ private:
     Logger::ptr m_root;
 };
 
-/// TODO:
 /// 日志管理器单例
 typedef zero::Singleton<LoggerManager> LoggerMgr;
 

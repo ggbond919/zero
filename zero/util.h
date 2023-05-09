@@ -1,5 +1,5 @@
-#ifndef _ZERO_UTIL_H_
-#define _ZERO_UTIL_H_
+#ifndef __ZERO_UTIL_H__
+#define __ZERO_UTIL_H__
 
 #include <bits/stdint-uintn.h>
 #include <cxxabi.h>  // for abi::__cxa_demangle()

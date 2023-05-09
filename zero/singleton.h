@@ -1,5 +1,5 @@
-#ifndef _ZERO_SINGLETON_H_
-#define _ZERO_SINGLETON_H_
+#ifndef __ZERO_SINGLETON_H__
+#define __ZERO_SINGLETON_H__
 
 #include <memory>
 
