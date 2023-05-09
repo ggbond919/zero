@@ -1,10 +1,14 @@
 #include "../zero/log.h"
+#include "zero/config.h"
 #include <sstream>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/node/parse.h>
 
 // 方式一，通过该宏获得全局名为root的logger
 // ZERO_LOG_ROOT使用loggerManager管理的日志器
 // 默认级别为INFO,默认输出地为终端
 zero::Logger::ptr g_logger = ZERO_LOG_ROOT();
+zero::Logger::ptr test_system = ZERO_LOG_NAME("system");
 
 int main() {
 
@@ -23,9 +27,9 @@ int main() {
     ZERO_LOG_DEBUG(g_logger) << "can print..";  // 会输出
 
     zero::FileLogAppender::ptr file_appender(new zero::FileLogAppender("../log/test_log.txt"));
-    g_logger->addAppender(file_appender);
-    ZERO_LOG_INFO(g_logger) << "test log appender";
-    ZERO_LOG_INFO(g_logger) << "test log appender";  // 文件默认从尾部开始写
+    test_system->addAppender(file_appender);
+    ZERO_LOG_INFO(test_system) << "test log appender";
+    ZERO_LOG_INFO(test_system) << "test log appender";  // 文件默认从尾部开始写
 
     // 调用日志方式二
     // 查找的过程中，如果不存在会自动创建一个logger，但是没有appender
@@ -39,6 +43,15 @@ int main() {
     zero::LogFormatter::ptr my_formatter(new zero::LogFormatter("%d%T%p%T%c%T%f:%l %m%n"));
     test_appender->setFormatter(my_formatter);
     ZERO_LOG_INFO(my_logger) << "test new formmatter";
+
+    // 调用方式三 动态配置的方式进行加载配置文件 配置变更的注册回调见log.cc文件末尾
+    YAML::Node n = YAML::LoadFile("/home/ubuntu/Zero/conf/log.yml");
+    zero::Config::LoadFromYaml(n);
+    // 因为加载的配置文件中，重新规定了输出格式，所以此处my_logger的输出格式会再次发生改变
+    ZERO_LOG_INFO(my_logger) << "test new formmatter";
+    // 而在配置文件中system的logger级别发生了变化，所以只能输出error级别的日志，并且appender也发生了变化
+    ZERO_LOG_INFO(test_system) << "test log config";   // 不输出
+    ZERO_LOG_ERROR(test_system) << "test log config";  // 输出
 
     return 0;
 }
