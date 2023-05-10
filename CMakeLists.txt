@@ -30,7 +30,9 @@ message("boost path" ${Boost_INCLUDE_DIRS})
 set(LIB_SRC
     zero/log.cc
     zero/util.cc
-    zero/config.cc     
+    zero/config.cc
+    zero/thread.cc
+    zero/mutex.cc     
 )
 
 add_library(zero SHARED ${LIB_SRC})
@@ -51,6 +53,8 @@ zero_add_executable(test_constructor "tests/test_constructor.cc" zero "${LIBS}")
 zero_add_executable(test_singleton "tests/test_singleton.cc" zero "${LIBS}")
 zero_add_executable(test_log "tests/test_log.cc" zero "${LIBS}")
 zero_add_executable(test_config "tests/test_config.cc" zero "${LIBS}")
+zero_add_executable(test_mutex "tests/test_mutex.cc" zero "${LIBS}")
+zero_add_executable(test_noncopyable "tests/test_noncopyable.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
