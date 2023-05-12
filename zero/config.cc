@@ -1,5 +1,6 @@
 #include "config.h"
 #include "zero/log.h"
+#include "zero/mutex.h"
 #include <algorithm>
 #include <bits/stdint-uintn.h>
 #include <cctype>
@@ -18,7 +19,7 @@ namespace zero {
 static zero::Logger::ptr g_logger = ZERO_LOG_NAME("system");
 
 ConfigVarBase::ptr Config::LookupBase(const std::string &name) {
-    /// TODO:锁
+    RWMutexType::ReadLock lock(GetMutex());
     auto it = GetDatas().find(name);
     return it == GetDatas().end() ? nullptr : it->second;
 }
@@ -65,7 +66,8 @@ void Config::LoadFromYaml(const YAML::Node& root) {
 /// 记录每个文件的修改时间
 static std::map<std::string, uint64_t> s_file2modifytime;
 /// 是否强制加载配置文件，非强制加载情况下，如果记录的文件修改时间未变化，则跳过该文件的加载
-/// TODO:锁
+/// 用在LoadFromConfDir()函数当中
+static zero::Mutex s_mutex;
 
 /**
  * @brief TODO: 暂未完成
@@ -81,7 +83,7 @@ void Config::LoadFromConfDir(const std::string& path, bool force) {
 }
 
 void Config::Visit(std::function<void(ConfigVarBase::ptr)> cb) {
-    /// TODO:锁
+    RWMutexType::ReadLock lock(GetMutex());
     ConfigVarMap& m = GetDatas();
     for (auto it = m.begin(); it != m.end(); ++it) {
         cb(it->second);

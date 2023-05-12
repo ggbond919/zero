@@ -3,6 +3,7 @@
 
 #include "singleton.h"
 #include "util.h"
+#include "mutex.h"
 #include <bits/stdint-intn.h>
 #include <bits/stdint-uintn.h>
 #include <bits/types/time_t.h>
@@ -302,7 +303,7 @@ private:
 class LogAppender {
 public:
     typedef std::shared_ptr<LogAppender> ptr;
-    /// TODO: 锁
+    typedef Spinlock MutexType;
 
     /**
      * @brief
@@ -338,7 +339,8 @@ public:
     virtual std::string toYamlString() = 0;
 
 protected:
-    /// TODO:Mutex
+    /// 自旋锁
+    MutexType m_mutex;
     /// 日志格式器
     LogFormatter::ptr m_formatter;
     /// 默认日志器
@@ -407,7 +409,7 @@ private:
 class Logger {
 public:
     typedef std::shared_ptr<Logger> ptr;
-    /// TODO: 锁
+    typedef Spinlock MutexType;
 
     /**
      * @brief
@@ -444,7 +446,8 @@ public:
     std::string toYamlString();
 
 private:
-    /// TODO: MUTEX
+    /// 自旋锁
+    MutexType m_mutex;
     /// 日志器名称
     std::string m_name;
     /// 日志器等级
@@ -483,7 +486,7 @@ private:
  */
 class LoggerManager {
 public:
-    /// TODO: MUTEX
+    typedef Spinlock MutexType;
     LoggerManager();
 
     /**
@@ -515,7 +518,8 @@ public:
     std::string toYamlString();
 
 private:
-    /// TODO: MUTEX
+    /// 自旋锁
+    MutexType m_mutex;
     std::map<std::string, Logger::ptr> m_loggers;
     Logger::ptr m_root;
 };

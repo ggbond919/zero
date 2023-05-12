@@ -35,7 +35,7 @@
 
 #include "log.h"
 #include "util.h"
-// TODO:mutex.h
+#include "mutex.h"
 
 namespace zero {
 
@@ -366,7 +366,7 @@ public:
 template <class T, class FromStr = LexicalCast<std::string, T>, class ToStr = LexicalCast<T, std::string>>
 class ConfigVar : public ConfigVarBase {
 public:
-    /// TODO: 读写锁
+    typedef RWMutex RWMutexType;
     typedef std::shared_ptr<ConfigVar> ptr;
     /// 动态配置，当配置更改时，程序运行过程中改变配置
     typedef std::function<void(const T& old_value, const T& new_value)> on_change_cb;
@@ -381,7 +381,7 @@ public:
      */
     std::string toString() override {
         try {
-            /// TODO:锁
+            RWMutexType::ReadLock lock(m_mutex);
             return ToStr()(m_val);
         } catch (std::exception& e) {
             /// TODO:Util::TypeToName()
@@ -416,7 +416,7 @@ public:
      * @return const T 
      */
     const T getValue() {
-        /// TODO:锁
+        RWMutexType::ReadLock lock(m_mutex);
         return m_val;
     }
 
@@ -426,7 +426,7 @@ public:
      */
     void setValue(const T& v) {
         {
-            /// TODO:锁
+            RWMutexType::ReadLock lock(m_mutex);
             if (v == m_val) {
                 return;
             }
@@ -434,7 +434,7 @@ public:
                 i.second(m_val, v);
             }
         }
-        /// TODO:锁
+        RWMutexType::WriteLock lock(m_mutex);
         m_val = v;
     }
 
@@ -451,7 +451,7 @@ public:
      */
     uint64_t addListener(on_change_cb cb) {
         static uint64_t s_fun_id = 0;
-        /// TODO:锁
+        RWMutexType::WriteLock lock(m_mutex);
         ++s_fun_id;
         m_cbs[s_fun_id] = cb;
         return s_fun_id;
@@ -463,7 +463,7 @@ public:
      * @param key 
      */
     void delListener(uint64_t key) {
-        /// TODO:锁
+        RWMutexType::WriteLock lock(m_mutex);
         m_cbs.erase(key);
     }
 
@@ -474,7 +474,7 @@ public:
      * @return on_change_cb 
      */
     on_change_cb getListener(uint64_t key) {
-        /// TODO:锁
+        RWMutexType::ReadLock lock(m_mutex);
         auto it = m_cbs.find(key);
         return it == m_cbs.end() ? nullptr : it->second;
     }
@@ -484,12 +484,12 @@ public:
      * 
      */
     void clearListener() {
-        /// TODO:锁
+        RWMutexType::WriteLock Lock(m_mutex);
         m_cbs.clear();
     }
 
 private:
-    /// TODO:锁
+    RWMutexType m_mutex;
     T m_val;
     /// 变更配置的回调函数集 uint64_t key要求唯一 可用hash
     std::map<uint64_t, on_change_cb> m_cbs;
@@ -502,7 +502,7 @@ private:
 class Config {
 public:
     typedef std::unordered_map<std::string, ConfigVarBase::ptr> ConfigVarMap;
-    /// TODO:锁
+    typedef RWMutex RWMutexType;
     
     /**
      * @brief 根据name获取/创建对应参数名的配置,如果name不存在，则创建配置并使用默认参数
@@ -516,7 +516,7 @@ public:
      */
     template <class T>
     static typename ConfigVar<T>::ptr Lookup(const std::string& name, const T& default_value, const std::string& description = "") {
-        /// TODO:锁
+        RWMutexType::WriteLock lock(GetMutex());
         auto it = GetDatas().find(name);
         if (it != GetDatas().end()) {
             auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
@@ -542,7 +542,7 @@ public:
 
     template <class T>
     static typename ConfigVar<T>::ptr Lookup(const std::string& name) {
-        /// TODO:锁
+        RWMutexType::ReadLock lock(GetMutex());
         auto it = GetDatas().find(name);
         if (it == GetDatas().end()) {
             return nullptr;
@@ -591,7 +591,10 @@ private:
         return s_datas;
     }
 
-    /// TODO:锁
+    static RWMutexType &GetMutex() {
+        static RWMutexType s_mutex;
+        return s_mutex;
+    }
 };
 
 }  // namespace zero
