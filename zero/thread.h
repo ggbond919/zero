@@ -2,6 +2,7 @@
 #define __ZERO_THREAD_H__
 
 #include "noncopyable.h"
+#include "zero/mutex.h"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -57,6 +58,7 @@ private:
     /// 线程名称
     std::string m_name;
     /// TODO:mutex
+    Semaphore m_semaphore;
 };
 
 }  // namespace zero
