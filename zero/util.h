@@ -37,6 +37,26 @@ uint64_t GetElapsedMS();
  */
 std::string GetThreadName();
 
+/**
+ * @brief 获取当前函数调用栈
+ * 
+ * @param bt 保存栈
+ * @param size 最多返回层数
+ * @param skip 跳过栈顶
+ */
+void Backtrace(std::vector<std::string> &bt, int size = 64, int skip = 1);
+
+/**
+ * @brief 栈信息转字符串
+ * 
+ * @param size 
+ * @param skip 
+ * @param prefix 栈信息前缀
+ * @return std::string 
+ */
+std::string BacktraceToString(int size = 64, int skip = 2, const std::string &prefix = "");
+
+
 }  // namespace zero
 
 #endif
