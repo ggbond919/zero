@@ -55,6 +55,8 @@ zero_add_executable(test_log "tests/test_log.cc" zero "${LIBS}")
 zero_add_executable(test_config "tests/test_config.cc" zero "${LIBS}")
 zero_add_executable(test_mutex "tests/test_mutex.cc" zero "${LIBS}")
 zero_add_executable(test_noncopyable "tests/test_noncopyable.cc" zero "${LIBS}")
+zero_add_executable(test_thread "tests/test_thread.cc" zero "${LIBS}")
+zero_add_executable(test_ucontext "tests/test_ucontext.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
