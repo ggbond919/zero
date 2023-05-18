@@ -1,5 +1,6 @@
 #include "util.h"
 #include "log.h"
+#include "fiber.h"
 #include <algorithm>  // for std::transform()
 #include <cstddef>
 #include <cstdlib>
@@ -26,8 +27,7 @@ pid_t GetThreadId() {
 }
 
 uint64_t GetFiberId() {
-    /// TODO:协程模块完善
-    return 0;
+    return Fiber::GetFiberId();
 }
 
 uint64_t GetElapsedMS() {
