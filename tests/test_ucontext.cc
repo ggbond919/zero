@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     uctx_func1.uc_stack.ss_sp = func1_stack;
     uctx_func1.uc_stack.ss_size = sizeof(func1_stack);
     // 指定uc_link
+    // 待当前上下文终止之后，切换到uc_link指定的上下文中去
     uctx_func1.uc_link = &uctx_main;
     // makecontext修改完上下文之后需要用setcontext或者swapcontext进行激活
     // 此时uctx_func1的上下文指向了func1的入口
@@ -56,7 +57,7 @@ int main(int argc, char* argv[]) {
 
     printf("main: swapcontext(&uctx_main, &uctx_func2)\n");
     // swapcontext是 先将当前上下文保存在第一个参数当中，然后执行第二个参数指定的上下文
-    // uctx_main就是个临时凑数的
+    // 当uctx_func1上下文结束之后 切换到uctx_main上下文当中去继续执行
     if (swapcontext(&uctx_main, &uctx_func2) == -1)
         handle_error("swapcontext");
 
