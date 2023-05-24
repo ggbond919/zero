@@ -23,6 +23,7 @@ void Test_Thread_Func() {
 }
 
 void Test_Thread() {
+    ZERO_LOG_INFO(g_logger) << "start...";
     for (int i = 0; i < 10000; ++i) {
         // zero::Mutex::Lock lock(g_mutex);
         // zero::RWMutex::WriteLock lock(g_wrmutex);
@@ -54,7 +55,8 @@ void Test_Thread_Mutex() {
         zero::Thread::ptr thr(new zero::Thread(std::bind(Test_Thread), "thread_" + std::to_string(i)));
         thrs.push_back(thr);
     }
-
+    sleep(5);
+    ZERO_LOG_INFO(g_logger) << "end..";
     // 如果b不进行join的话，析构时会detach，很可能主函数执行完了，线程还没来得及执行
     for (size_t i = 0; i < thrs.size(); i++) {
         thrs[i]->join();

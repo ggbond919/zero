@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         handle_error("getcontext");
     
     // 如果直接在这里set重置上下文，会一直set陷入到死循环当中
-    setcontext(&uctx_func1);
+    // setcontext(&uctx_func1);
 
     // 调用makecontext之前，分配新的栈，并指定ucontext_t *uc_link
     uctx_func1.uc_stack.ss_sp = func1_stack;
