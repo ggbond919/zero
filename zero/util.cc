@@ -2,6 +2,7 @@
 #include "log.h"
 #include "fiber.h"
 #include <algorithm>  // for std::transform()
+#include <bits/types/struct_timeval.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cxxabi.h>   // for abi::__cxa_demangle()
@@ -11,6 +12,7 @@
 #include <signal.h>    // for kill()
 #include <sstream>
 #include <string.h>
+#include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <time.h>
@@ -30,9 +32,16 @@ uint64_t GetFiberId() {
     return Fiber::GetFiberId();
 }
 
-uint64_t GetElapsedMS() {
-    /// TODO:
-    return 0;
+uint64_t GetCurrentMS() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000ul + tv.tv_usec / 1000;
+}
+
+uint64_t GetCurrentUS() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000 * 1000ul + tv.tv_usec;
 }
 
 std::string GetThreadName() {

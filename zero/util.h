@@ -29,7 +29,14 @@ uint64_t GetFiberId();
  * @brief 获取服务器当前启动的毫秒数
  *
  */
-uint64_t GetElapsedMS();
+uint64_t GetCurrentMS();
+
+/**
+ * @brief 获取当前时间的微妙
+ * 
+ * @return uint64_t 
+ */
+uint64_t GetCurrentUS();
 
 /**
  * @brief 获取线程名称
