@@ -1,6 +1,7 @@
 #include "log.h"
 #include "config.h"
 #include "zero/mutex.h"
+#include "zero/util.h"
 #include <bits/stdint-intn.h>
 #include <bits/stdint-uintn.h>
 #include <bits/types/time_t.h>
@@ -466,9 +467,8 @@ std::string FileLogAppender::toYamlString() {
 
 Logger::Logger(const std::string& name)
     : m_name(name), m_level(LogLevel::INFO)
-      /// TODO: GetElapsedMS()
       ,
-      m_createTime(0) {}
+      m_createTime(zero::GetCurrentMS()) {}
 
 void Logger::addAppender(LogAppender::ptr appender) {
     MutexType::Lock lock(m_mutex);

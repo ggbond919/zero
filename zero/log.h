@@ -42,7 +42,7 @@
 #define ZERO_LOG_LEVEL(logger, level)                                                                                                 \
     if (level <= logger->getLevel())                                                                                                  \
     zero::LogEventWrap(logger, zero::LogEvent::ptr(new zero::LogEvent(                                                                \
-                                   logger->getName(), level, __FILE__, __LINE__, zero::GetElapsedMS() - logger->getCreateTime(),      \
+                                   logger->getName(), level, __FILE__, __LINE__, zero::GetCurrentMS() - logger->getCreateTime(),      \
                                    zero::GetThreadId(), zero::GetFiberId(), time(0), zero::GetThreadName())))                         \
         .getLogEvent()                                                                                                                \
         ->getSS()
@@ -71,7 +71,7 @@
 #define ZERO_LOG_FMT_LEVEL(logger, level, fmt, ...)                                                                                   \
     if (level <= logger->getLevel())                                                                                                  \
     zero::LogEventWrap(logger, zero::LogEvent::ptr(new zero::LogEvent(                                                                \
-                                   logger->getName(), level, __FILE__, __LINE__, zero::GetElapsedMS() - logger->getCreateTime(),      \
+                                   logger->getName(), level, __FILE__, __LINE__, zero::GetCurrentMS() - logger->getCreateTime(),      \
                                    zero::GetThreadId(), zero::GetFiberId(), time(0), zero::GetThreadName())))                         \
         .getLogEvent()                                                                                                                \
         ->printf(fmt, __VA_ARGS__)
