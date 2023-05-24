@@ -76,10 +76,10 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller) : m_id
     m_ctx.uc_stack.ss_size = m_stacksize;
 
     if (!use_caller) {
-        // 调度器调度
+        /// 调度器调度
         makecontext(&m_ctx, &Fiber::MainFunc, 0);
     } else {
-        // 自己调度
+        /// 自己调度
         makecontext(&m_ctx, &Fiber::CallerMainFunc, 0);
     }
     ZERO_LOG_INFO(g_logger) << "Fiber::Fiber id = " << m_id;
@@ -87,6 +87,12 @@ Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller) : m_id
 
 Fiber::~Fiber() {
     --s_fiber_count;
+    if(this == t_threadFiber.get()) {
+        /// 所有主协程id都是0，
+        ZERO_LOG_INFO(g_logger) << "Fiber::~Fiber MainFiber id = " << m_id << " total = " << s_fiber_count;
+    } else {
+        ZERO_LOG_INFO(g_logger) << "Fiber::~Fiber id = " << m_id << " total = " << s_fiber_count;
+    }
     if (m_stack) {
         ZERO_ASSERT(m_state == TERM || m_state == EXCEPT || m_state == INIT);
         StackAllocator::Dealloc(m_stack, m_stacksize);
@@ -99,7 +105,6 @@ Fiber::~Fiber() {
             SetThis(nullptr);
         }
     }
-    ZERO_LOG_INFO(g_logger) << "Fiber::~Fiber id = " << m_id << " total = " << s_fiber_count;
 }
 
 void Fiber::reset(std::function<void()> cb) {
@@ -118,6 +123,7 @@ void Fiber::reset(std::function<void()> cb) {
     m_state = INIT;
 }
 
+/// 主协程上下文保存在调用该函数的地方
 void Fiber::call() {
     SetThis(this);
     m_state = EXEC;
@@ -133,6 +139,7 @@ void Fiber::back() {
     }
 }
 
+/// 主协程上下文保存在调用该函数的地方
 void Fiber::swapIn() {
     SetThis(this);
     ZERO_ASSERT(m_state != EXEC);
@@ -142,6 +149,7 @@ void Fiber::swapIn() {
     }
 }
 
+/// 切换至主协程上下文中去
 void Fiber::swapOut() {
     /// 多线程情况下，切换到执行线程的主协程中去
     SetThis(Scheduler::GetMainFiber());
@@ -202,13 +210,14 @@ void Fiber::MainFunc() {
     }
 
     auto raw_ptr = cur.get();
-    cur.reset();
+    cur.reset();  
     raw_ptr->swapOut();
 
     ZERO_ASSERT2(false, "never reach fiber_id=" + std::to_string(raw_ptr->getId()));
 }
 
 void Fiber::CallerMainFunc() {
+    /// 子协程引用计数会加1
     Fiber::ptr cur = GetThis();
     ZERO_ASSERT(cur);
     try {
@@ -227,6 +236,7 @@ void Fiber::CallerMainFunc() {
     }
 
     auto raw_ptr = cur.get();
+    /// 让子协程引用计数减1
     cur.reset();
     raw_ptr->back();
     ZERO_ASSERT2(false, "never reach fiber_id=" + std::to_string(raw_ptr->getId()));
