@@ -23,7 +23,7 @@ namespace zero {
 class Scheduler {
 public:
     typedef std::shared_ptr<Scheduler> ptr;
-    typedef Spinlock MutexType;
+    typedef Mutex MutexType;
 
     /**
      * @brief Construct a new Scheduler object
@@ -32,7 +32,7 @@ public:
      * @param use_caller 是否将当前线程作为调度线程
      * @param name 协程调度器名称
      */
-    Scheduler(size_t threads = 1, bool use_caller = true, const std::string& name = "");
+    Scheduler(size_t threads = 1, bool use_caller = false, const std::string& name = "");
 
     virtual ~Scheduler();
 
@@ -85,7 +85,7 @@ public:
             MutexType::Lock lock(m_mutex);
             need_tickle = scheduleNoLock(fc, thread);
         }
-
+        /// 任务队列不为空时则通知取任务执行
         if (need_tickle) {
             tickle();
         }

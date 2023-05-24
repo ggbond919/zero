@@ -89,7 +89,7 @@ void IOManager::FdContext::triggerEvent(IOManager::Event event) {
     ZERO_ASSERT(events & event);
 
     // 每次触发事件之前都要清空当前events
-    events = (Event)(events & ~event);
+    events = ( Event )(events & ~event);
     EventContext& ctx = getContext(event);
     if (ctx.cb) {
         ctx.scheduler->schedule(&ctx.cb);
@@ -187,7 +187,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> cb) {
     }
 
     ++m_pendingEventCount;
-    fd_ctx->events = (Event)(fd_ctx->events | event);
+    fd_ctx->events = ( Event )(fd_ctx->events | event);
     FdContext::EventContext& event_ctx = fd_ctx->getContext(event);
     ZERO_ASSERT(!event_ctx.scheduler && !event_ctx.fiber && !event_ctx.cb);
     event_ctx.scheduler = Scheduler::GetThis();
@@ -213,7 +213,7 @@ bool IOManager::delEvent(int fd, Event event) {
         return false;
     }
 
-    Event new_events = (Event)(fd_ctx->events & ~event);
+    Event new_events = ( Event )(fd_ctx->events & ~event);
     int op = new_events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
     epoll_event epevent;
     epevent.events = EPOLLET | new_events;
@@ -246,7 +246,7 @@ bool IOManager::cancelEvent(int fd, Event event) {
         return false;
     }
 
-    Event new_events = (Event)(fd_ctx->events & ~event);
+    Event new_events = ( Event )(fd_ctx->events & ~event);
     int op = new_events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
     epoll_event epevent;
     epevent.events = EPOLLET | new_events;
@@ -315,8 +315,9 @@ void IOManager::tickle() {
 }
 
 bool IOManager::stopping(uint64_t& timeout) {
-    /// TODO:timer
-    ///timeout = getNextTimer();
+    /// 获取对应于timer集合当中最小的超时时间
+    timeout = getNextTimer();
+    /// 如果timer集合为空，则说明该停止了
     return timeout == ~0ull && m_pendingEventCount == 0 && Scheduler::stopping();
 }
 
@@ -325,6 +326,7 @@ bool IOManager::stopping() {
     return stopping(timeout);
 }
 
+/// 尽量避免协程栈溢出问题
 void IOManager::idle() {
     ZERO_LOG_DEBUG(g_logger) << "idle";
     const uint64_t MAX_EVENTS = 256;
@@ -339,8 +341,13 @@ void IOManager::idle() {
         }
 
         int rt = 0;
+        /// 陷入到epoll_wait进行等待，最长三秒之后返回
+        /// 情况1 收集并执行超时timer的回调
+        /// 情况2 继续利用idle协程去执行关注的fd的事件
         do {
+            /// 设置最大超时时间未3秒
             static const int MAX_TIMEOUT = 3000;
+            /// 每次比较定时器集合中最小timer的待触发间隔与默认超时时间，为避免定时器超时时间太大时，epoll_wait一直阻塞
             if (next_timeout != ~0ull) {
                 next_timeout = ( int )next_timeout > MAX_TIMEOUT ? MAX_TIMEOUT : next_timeout;
             } else {
@@ -348,16 +355,17 @@ void IOManager::idle() {
             }
             rt = epoll_wait(m_epfd, events, MAX_EVENTS, ( int )next_timeout);
             if (rt < 0 && errno == EINTR) {
-
+                /// 信号中断处理
             } else {
                 break;
             }
 
         } while (true);
 
+        /// 每次epoll_wait超时返回之后应该根据当前系统时间，执行所有已经超时的timer回调函数
+        /// 收集完所有的超时timer回调函数之后，交由scheduler去进行调度
         std::vector<std::function<void()>> cbs;
-        /// TODO:
-        // listExpiredCb(cbs);
+        listExpiredCb(cbs);
         if (!cbs.empty()) {
             schedule(cbs.begin(), cbs.end());
             cbs.clear();
@@ -365,6 +373,8 @@ void IOManager::idle() {
 
         for (int i = 0; i < rt; ++i) {
             epoll_event& event = events[i];
+            /// 如果是m_tickleFds[0],说明scheduler利用tickle函数通知有新任务到来，需要让idle协程让出上下文唤醒其他协程去调度任务了
+            /// 
             if (event.data.fd == m_tickleFds[0]) {
                 uint8_t dummy[256];
                 while (read(m_tickleFds[0], dummy, sizeof(dummy)) > 0)
@@ -374,6 +384,9 @@ void IOManager::idle() {
 
             FdContext* fd_ctx = ( FdContext* )event.data.ptr;
             FdContext::MutexType::Lock lock(fd_ctx->mutex);
+            /// 为什么同时监听这两类事件，因为这两类事件我们无需设置到epoll就能通过系统得到反馈
+            /// 1. 当发生err事件时，我们需要关闭该连接
+            /// 2. 当发生hup事件时，说明对端关闭了，我们可能需要重新拉起客户端的连接
             if (event.events & (EPOLLERR | EPOLLHUP)) {
                 event.events |= (EPOLLIN | EPOLLOUT) & fd_ctx->events;
             }
@@ -385,6 +398,7 @@ void IOManager::idle() {
                 real_events |= WRITE;
             }
 
+            /// 说明当前事件未触发读写，不作处理
             if ((fd_ctx->events & real_events) == NONE) {
                 continue;
             }
@@ -419,9 +433,8 @@ void IOManager::idle() {
     }
 }
 
-/// TODO
-// void IOManager::onTimerInsertedAtFront() {
-//     tickle();
-// }
+void IOManager::onTimerInsertedAtFront() {
+    tickle();
+}
 
 }  // namespace zero

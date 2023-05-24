@@ -170,6 +170,7 @@ void Scheduler::run() {
             tickle_me |= it != m_fibers.end();
         }
 
+        /// 有任务到来，通知idle协程让出上下文
         if (tickle_me) {
             tickle();
         }

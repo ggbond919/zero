@@ -10,12 +10,11 @@
 #include <functional>
 #include <memory>
 #include <vector>
-/// TODO:timer
+#include "timer.h"
 
 namespace zero {
 
-/// TODO:timer
-class IOManager : public Scheduler {
+class IOManager : public Scheduler, public TimerManager {
 public:
     typedef std::shared_ptr<IOManager> ptr;
     typedef RWMutex RWMutexType;
@@ -38,7 +37,7 @@ private:
     struct FdContext {
         typedef Mutex MutexType;
         /**
-         * @brief 事件上下文
+         * @brief 事件上下文,
          * 
          */
         struct EventContext {
@@ -69,6 +68,7 @@ private:
          */
         void triggerEvent(Event event);
 
+        /// 之所以设置两个事件的上下文，是因为可以将他们交由不同的调度器进行调度
         /// 读事件上下文
         EventContext read;
         /// 写事件上下文
@@ -81,7 +81,7 @@ private:
     };
 
 public:
-    IOManager(size_t threads = -1, bool use_caller = true, const std::string& name = "");
+    IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = "");
 
     ~IOManager();
 
@@ -135,7 +135,7 @@ protected:
     void tickle() override;
     bool stopping() override;
     void idle() override;
-    /// TODO: timer
+    void onTimerInsertedAtFront() override;
 
     /**
      * @brief 重置socker句柄上下文的容器大小
