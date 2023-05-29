@@ -36,6 +36,9 @@ set(LIB_SRC
     zero/fiber.cc 
     zero/scheduler.cc
     zero/iomanager.cc
+    zero/timer.cc
+    zero/fd_manager.cc
+    zero/hook.cc
 )
 
 add_library(zero SHARED ${LIB_SRC})
@@ -62,6 +65,9 @@ zero_add_executable(test_thread "tests/test_thread.cc" zero "${LIBS}")
 zero_add_executable(test_ucontext "tests/test_ucontext.cc" zero "${LIBS}")
 zero_add_executable(test_fiber "tests/test_fiber.cc" zero "${LIBS}")
 zero_add_executable(test_iomanager "tests/test_iomanager.cc" zero "${LIBS}")
+zero_add_executable(test_timer "tests/test_timer.cc" zero "${LIBS}")
+zero_add_executable(test_scheduler "tests/test_scheduler.cc" zero "${LIBS}")
+zero_add_executable(test_endian "tests/test_endian.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
