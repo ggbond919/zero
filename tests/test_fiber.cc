@@ -21,6 +21,7 @@ void Test_UCFiber_Func() {
     raw_ptr = cur.get();
     cur.reset();
 
+    /// 如果子协程执行任务过程中再调用back，会导致引用计数无法减为0，从而无法释放
     raw_ptr->back();
     ZERO_LOG_INFO(g_logger) << "never reach here";
 }
