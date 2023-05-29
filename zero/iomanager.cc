@@ -242,6 +242,8 @@ bool IOManager::cancelEvent(int fd, Event event) {
     lock.unlock();
 
     FdContext::MutexType::Lock lock2(fd_ctx->mutex);
+
+    /// 先验证当前fd_ctx->events是否有event这个事件，如果没有直接返回false
     if (ZERO_UNLIKELY(!(fd_ctx->events & event))) {
         return false;
     }
@@ -302,6 +304,7 @@ bool IOManager::cancelAll(int fd) {
     return true;
 }
 
+/// 向下转型有问题
 IOManager* IOManager::GetThis() {
     return dynamic_cast<IOManager*>(Scheduler::GetThis());
 }
@@ -331,6 +334,8 @@ void IOManager::idle() {
     ZERO_LOG_DEBUG(g_logger) << "idle";
     const uint64_t MAX_EVENTS = 256;
     epoll_event* events = new epoll_event[MAX_EVENTS]();
+
+    /// 自定义智能指针管理的数组释放规则
     std::shared_ptr<epoll_event> shared_events(events, [](epoll_event* ptr) { delete[] ptr; });
 
     while (true) {
@@ -356,7 +361,7 @@ void IOManager::idle() {
             rt = epoll_wait(m_epfd, events, MAX_EVENTS, ( int )next_timeout);
             if (rt < 0 && errno == EINTR) {
                 /// 信号中断处理
-            } else {
+            } else { /// 超时或者有事件到来都会退出
                 break;
             }
 
@@ -425,6 +430,7 @@ void IOManager::idle() {
             }
         }
 
+        /// idle协程让出上下文
         Fiber::ptr cur = Fiber::GetThis();
         auto raw_ptr = cur.get();
         cur.reset();

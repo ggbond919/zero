@@ -210,6 +210,8 @@ void Fiber::MainFunc() {
     }
 
     auto raw_ptr = cur.get();
+    /// 让子协程引用计数减1
+    /// 当外部函数执行完，引用计数为0时，自动释放
     cur.reset();  
     raw_ptr->swapOut();
 
@@ -237,6 +239,7 @@ void Fiber::CallerMainFunc() {
 
     auto raw_ptr = cur.get();
     /// 让子协程引用计数减1
+    /// 当外部函数执行完，引用计数为0时，自动释放
     cur.reset();
     raw_ptr->back();
     ZERO_ASSERT2(false, "never reach fiber_id=" + std::to_string(raw_ptr->getId()));
