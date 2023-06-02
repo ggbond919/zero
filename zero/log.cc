@@ -539,6 +539,7 @@ Logger::ptr LoggerManager::getLogger(const std::string& name) {
 
     // 增加一下appender
     logger->addAppender(LogAppender::ptr(new StdoutLogAppender));
+    logger->setLevel(LogLevel::Level::DEBUG);
     m_loggers[name] = logger;
     return logger;
 }
