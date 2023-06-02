@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-/// TODO:hook
+#include "hook.h"
 
 namespace zero {
 
@@ -124,7 +124,7 @@ void Scheduler::setThis() {
 
 void Scheduler::run() {
     ZERO_LOG_INFO(g_logger) << m_name << " run";
-    /// TODO:HOOK
+    set_hook_enable(true);
     setThis();
     /// 如果当前线程不是caller线程，则为当前线程创建一个主协程
     if (zero::GetThreadId() != m_rootThread) {
