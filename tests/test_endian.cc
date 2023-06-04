@@ -1,5 +1,6 @@
 #include "zero/myendian.h"
 #include "zero/log.h"
+#include <bitset>
 #include <byteswap.h>
 #include <cstdint>
 #include <iostream>
@@ -47,6 +48,13 @@ void Test_BSwap() {
     
     ZERO_LOG_INFO(g_logger) << std::hex << x << " x ==> swap(x) " << std::hex << bswap_64(x);
     ZERO_LOG_INFO(g_logger) << std::hex << x << " x ==> swap(x) " << std::hex << zero::byteswapOnLittleEndian(x);
+
+    uint32_t n = 0x1234;
+    /// 低地址存低位
+    /// 二进制小端
+    ZERO_LOG_INFO(g_logger) << std::bitset<32>(n);
+    /// 二进制大端
+    ZERO_LOG_INFO(g_logger) << std::bitset<32>(zero::byteswapOnLittleEndian(n));
 }
 
 int main() {
