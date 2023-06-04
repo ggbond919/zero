@@ -41,6 +41,7 @@ set(LIB_SRC
     zero/hook.cc
     zero/address.cc
     zero/socket.cc
+    zero/bytearray.cc
 )
 
 add_library(zero SHARED ${LIB_SRC})
