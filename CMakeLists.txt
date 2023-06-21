@@ -42,6 +42,9 @@ set(LIB_SRC
     zero/address.cc
     zero/socket.cc
     zero/bytearray.cc
+    zero/tcp_server.cc
+    zero/stream.cc
+    zero/streams/socket_stream.cc
 )
 
 add_library(zero SHARED ${LIB_SRC})
@@ -73,6 +76,7 @@ zero_add_executable(test_scheduler "tests/test_scheduler.cc" zero "${LIBS}")
 zero_add_executable(test_endian "tests/test_endian.cc" zero "${LIBS}")
 zero_add_executable(test_address "tests/test_address.cc" zero "${LIBS}")
 zero_add_executable(test_socket "tests/test_socket.cc" zero "${LIBS}")
+zero_add_executable(test_bytearray "tests/test_bytearray.cc" zero "${LIBS}")
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
