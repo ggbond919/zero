@@ -145,6 +145,7 @@ void Scheduler::run() {
         {
             MutexType::Lock lock(m_mutex);
             auto it = m_fibers.begin();
+            /// 可优化，因为每次都要去任务队列从头循环遍历取任务
             while (it != m_fibers.end()) {
                 /// 需要到指定线程去调度，跳过
                 if (it->thread != -1 && it->thread != zero::GetThreadId()) {
@@ -154,13 +155,15 @@ void Scheduler::run() {
                 }
 
                 ZERO_ASSERT(it->fiber || it->cb);
-                /// 该任务正在被调度，跳过
+                /// 该任务正在被调度，跳过（该情况针对IOManager添加事件时，不设置回调的情形）
+                /// hold状态是否也加入判断？
                 if (it->fiber && it->fiber->getState() == Fiber::EXEC) {
                     ++it;
                     continue;
                 }
 
                 ft = *it;
+                /// 防止迭代器失效的做法
                 m_fibers.erase(it++);
                 ++m_activeThreadCount;
                 is_active = true;

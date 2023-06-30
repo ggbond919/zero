@@ -428,7 +428,10 @@ std::ostream& IPv6Address::insert(std::ostream &os) const {
 IPAddress::ptr IPv6Address::broadcastAddress(uint32_t prefix_len) {
     sockaddr_in6 baddr(m_addr);
     /// 直接按照大端存储即可
+    /// s6_addr是一个uint8_t数组，长度为16
+    /// 先将当前下标中8bits剩余部分置为1
     baddr.sin6_addr.s6_addr[prefix_len / 8] |= CreateMask<uint8_t>(prefix_len % 8);
+    /// 再将剩余数组部分全部置为1
     for(int i = prefix_len / 8 + 1; i < 16; ++i) {
         baddr.sin6_addr.s6_addr[i] = 0xff;
     }

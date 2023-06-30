@@ -85,10 +85,10 @@ void IOManager::FdContext::resetContext(EventContext& ctx) {
 }
 
 void IOManager::FdContext::triggerEvent(IOManager::Event event) {
-    // 必须是相同的事件，即已经注册过的事件，否则不触发
+    /// 必须是相同的事件，即已经注册过的事件，否则不触发
     ZERO_ASSERT(events & event);
 
-    // 每次触发事件之前都要清空当前events
+    /// 每次触发事件之前都要清空当前events
     events = ( Event )(events & ~event);
     EventContext& ctx = getContext(event);
     if (ctx.cb) {
@@ -195,6 +195,7 @@ int IOManager::addEvent(int fd, Event event, std::function<void()> cb) {
         event_ctx.cb.swap(cb);
     } else {
         event_ctx.fiber = Fiber::GetThis();
+        /// 该情形在Scheduler::run里面处理了，如果状态为EXEC，则跳过
         ZERO_ASSERT2(event_ctx.fiber->getState() == Fiber::EXEC, "STATE = " << event_ctx.fiber->getState());
     }
     return 0;
@@ -304,7 +305,7 @@ bool IOManager::cancelAll(int fd) {
     return true;
 }
 
-/// 向下转型有问题
+/// 
 IOManager* IOManager::GetThis() {
     return dynamic_cast<IOManager*>(Scheduler::GetThis());
 }
@@ -379,7 +380,7 @@ void IOManager::idle() {
         for (int i = 0; i < rt; ++i) {
             epoll_event& event = events[i];
             /// 如果是m_tickleFds[0],说明scheduler利用tickle函数通知有新任务到来，需要让idle协程让出上下文唤醒其他协程去调度任务了
-            /// 
+            /// 让出CPU之前，先把所有IO事件处理完
             if (event.data.fd == m_tickleFds[0]) {
                 uint8_t dummy[256];
                 while (read(m_tickleFds[0], dummy, sizeof(dummy)) > 0)

@@ -97,6 +97,7 @@ Fiber::~Fiber() {
         ZERO_ASSERT(m_state == TERM || m_state == EXCEPT || m_state == INIT);
         StackAllocator::Dealloc(m_stack, m_stacksize);
     } else {
+        /// 没用到栈，即主协程
         ZERO_ASSERT(!m_cb);
         ZERO_ASSERT(m_state == EXEC);
 
